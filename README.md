@@ -1,117 +1,202 @@
+# README.md
 
----
+## Machine Translation with Transformer Architecture
 
-# Transformers from Scratch
+This project implements a Transformer model for machine translation from English to French using PyTorch. The code is split into modular files for better readability and maintainability.
 
-## Description
+## Table of Contents
 
-This project implements a **Transformer-based Machine Translation Model** from scratch using PyTorch. The transformer is trained to translate text from English to French, using a parallel corpus. The project follows the architecture described in the **"Attention is All You Need"** paper, implementing all the components of the transformer (encoder, decoder, attention mechanism) without using any pre-built PyTorch modules for the transformer. 
+- [Prerequisites](#prerequisites)
+- [File Structure](#file-structure)
+- [Dataset](#dataset)
+- [Setup and Installation](#setup-and-installation)
+- [Training the Model](#training-the-model)
+- [Testing the Model](#testing-the-model)
+- [Loading the Pre-trained Model](#loading-the-pre-trained-model)
+- [Implementation Assumptions](#implementation-assumptions)
+- [References](#references)
 
-The model's performance is evaluated using the **BLEU score** and other translation-related metrics.
+## Prerequisites
 
-## Requirements
+- Python 3.7 or higher
+- PyTorch 1.7 or higher
+- NLTK
+- NumPy
+- Matplotlib
 
-- **Language**: Python
-- **Framework**: PyTorch (No pre-built transformer modules should be used)
-- **Dataset**: IWSLT 2016 English-French translation dataset (subset)
+## File Structure
 
-## Model Components
-
-### 1. Encoder
-- Multi-head self-attention mechanism.
-- Feedforward layers with layer normalization and residual connections.
-
-### 2. Decoder
-- Multi-head self-attention mechanism for the target sequence.
-- Cross-attention between the encoder's output and the target sequence.
-- Feedforward layers with layer normalization and residual connections.
-
-### 3. Positional Encoding
-- Adds positional information to the input embeddings.
-  
-### 4. Output
-- A softmax layer that predicts the probability distribution over the vocabulary for each token in the target sentence.
+- `train.py`: Main script to train the Transformer model.
+- `test.py`: Script to test the pre-trained model on the test set.
+- `encoder.py`: Contains the `Encoder` class and related components.
+- `decoder.py`: Contains the `Decoder` class and related components.
+- `model.py`: Defines the `Transformer` model combining encoder and decoder.
+- `utils.py`: Includes helper functions and classes such as `Vocabulary`, `Dataset`, and training utilities.
+- `data/`: Directory containing the dataset files (`train.en`, `train.fr`, `dev.en`, `dev.fr`, `test.en`, `test.fr`).
+- `transformer.pt`: The saved pre-trained model file (if available).
 
 ## Dataset
 
-- **Train**: 30,000 lines of parallel English-French sentences.
-- **Dev**: 887 lines for validation.
-- **Test**: 1,305 lines for evaluation.
-  
-Download the dataset from [this link](https://iiitaphyd-my.sharepoint.com/:u:/g/personal/advaith_malladi_research_iiit_ac_in/EfJobufGgdRLt7PPNNLY9pwBZqdqzurkFJ5hznQYiF1pbQ?e=zy5XZa).
+The dataset should be organized as follows:
 
-## How to Run
-
-### 1. Install Dependencies
-Ensure you have PyTorch and other required libraries installed:
-```bash
-pip install torch
+```
+data/
+├── train.en   # English training data
+├── train.fr   # French training data
+├── dev.en     # English validation data
+├── dev.fr     # French validation data
+├── test.en    # English test data
+└── test.fr    # French test data
 ```
 
-### 2. Training the Transformer Model
-To train the transformer on the machine translation task, run the following command:
-```bash
-python train.py
-```
-The trained model will be saved as `transformer.pt`.
+Ensure that the dataset files are preprocessed (tokenized and cleaned) and aligned line by line between the source and target languages.
 
-### 3. Testing the Pretrained Model
-To test the pretrained transformer model on the test set:
-```bash
-python test.py
-```
-This will output the BLEU scores for all test set sentences in a file named `testbleu.txt`.
+## Setup and Installation
 
-### 4. Pretrained Model
-If the pretrained model exceeds the file size limit, it will be uploaded to external storage (e.g., OneDrive). You can load the pretrained model with the following command:
-```bash
-python test.py --load_model <path_to_transformer_model>
-```
 
-## Hyperparameter Tuning
 
-You can adjust the following hyperparameters to optimize the model's performance:
-- **Number of layers** in the encoder/decoder.
-- **Number of attention heads**.
-- **Embedding dimensions**.
-- **Dropout rates**.
+1. **Create a Virtual Environment (Optional but Recommended)**
 
-Run experiments with at least three different configurations and report the results in the PDF report, along with loss graphs and BLEU scores.
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
 
-## Evaluation Metrics
+   ```
 
-- **BLEU Score**: Measures the quality of translations by comparing them to human-generated translations.
-- **Loss Curves**: Plot the training and validation loss during training.
+2. **Install Dependencies**
 
-## Submission Format
 
-Zip the following files into a single archive and upload it:
-1. **Source Code**:
-   - `train.py`: Main script for training the transformer model.
-   - `test.py`: Script for testing the pretrained transformer model.
-   - `encoder.py`: Implementation of the encoder class.
-   - `decoder.py`: Implementation of the decoder class.
-   - `utils.py`: Helper functions.
-   
-2. **Pretrained Model**:
-   - `transformer.pt`: The saved transformer model.
-   
-3. **Text Files**:
-   - `testbleu.txt`: Contains BLEU scores for all test set sentences.
 
-4. **Report (PDF)**:
-   - Theory questions.
-   - Hyperparameters used for training.
-   - Loss graphs and evaluation metrics.
-   - Detailed analysis of results and performance differences across hyperparameter configurations.
+   ```bash
+   pip install torch nltk numpy matplotlib
 
-5. **README.md**:
-   - Instructions on how to run the code and load pretrained models.
-   - Links to pretrained models (if applicable).
+   ```
 
-## Resources
+3. **Download NLTK Data**
 
-1. [Attention is All You Need](https://arxiv.org/abs/1706.03762)
-2. [The Illustrated Transformer](http://jalammar.github.io/illustrated-transformer/)
+   In your Python environment, download the NLTK tokenizer:
+
+   ```python
+   import nltk
+   nltk.download('punkt')
+
+   ```
+
+## Training the Model
+
+To train the Transformer model from scratch:
+
+1. **Update Data Path**
+
+   In `train.py`, update the `DATA_PATH` variable to point to your dataset directory:
+
+   ```python
+   DATA_PATH = 'path/to/your/data'
+
+   ```
+
+2. **Run the Training Script**
+
+   ```bash
+   python train.py
+
+   ```
+
+   This script will:
+
+   - Load and preprocess the data.
+   - Build the vocabularies.
+   - Initialize and train the Transformer model.
+   - Save the trained model to `transformer.pt`.
+   - Plot and save the training and validation loss curves as `loss_plot.png`.
+
+3. **Adjust Hyperparameters (Optional)**
+
+   You can adjust the hyperparameters in `train.py` to experiment with different settings:
+
+   ```python
+   NUM_EPOCHS = 15
+   BATCH_SIZE = 128
+   LEARNING_RATE = 0.0001
+   # ... and others
+
+   ```
+
+## Testing the Model
+
+To evaluate the model on the test set:
+
+1. **Ensure the Pre-trained Model is Available**
+
+   Make sure to download `transformer.pt` .
+
+2. **Update Data Path**
+
+   In `test.py`, update the `DATA_PATH` variable to point to your dataset directory:
+
+   ```python
+      DATA_PATH = 'path/to/your/data'
+
+   ```
+
+3. **Run the Testing Script**
+
+   ```bash
+        python test.py
+
+   ```
+
+   This script will:
+
+   - Load the test data and vocabularies.
+   - Load the pre-trained model.
+   - Generate translations for the test set.
+   - Calculate BLEU scores and save them to `testbleu.txt`.
+   - Plot and save the BLEU score distribution as `bleu_distribution.png`.
+   - Display sample translations and their BLEU scores.
+
+## Loading the Pre-trained Model
+
+If you have a pre-trained model file `transformer.pt`, you can use it without retraining:
+
+1. **Place the Model File**
+
+   Ensure `transformer.pt` is in the same directory as your scripts.
+
+2. **Run the Testing Script**
+
+   ```bash
+        python test.py
+
+   ```
+
+   The script will automatically load the model and proceed with evaluation.
+
+## Implementation Assumptions
+
+- **Data Alignment**: It is assumed that the source and target datasets are aligned line by line.
+- **Tokenization**: Basic tokenization is performed using NLTK's `word_tokenize`.
+- **Vocabulary Threshold**: Words occurring less than two times are treated as `<UNK>`.
+- **Sequence Length**: Maximum sequence length is set to 60 tokens. Sequences longer than this are truncated.
+- **Special Tokens**: The following special tokens are used:
+  - `<PAD>`: Padding token (index 0)
+  - `<SOS>`: Start-of-sentence token (index 1)
+  - `<EOS>`: End-of-sentence token (index 2)
+  - `<UNK>`: Unknown word token (index 3)
+
+
+
+## References
+
+- Vaswani, A., Shazeer, N., Parmar, N., et al. (2017). [Attention Is All You Need](https://arxiv.org/abs/1706.03762). *Advances in Neural Information Processing Systems*.
 
 ---
+
+** Pre-trained Model **
+
+
+- **Download Pre-trained Model**: [https://iiitaphyd-my.sharepoint.com/:u:/g/personal/shivashankar_gande_students_iiit_ac_in/EXs3y2gJx8lMm4qeUhvVC54Bixd4y2jqY1YGDOwfhajV2Q?e=20drhX]
+
+
+---
+
